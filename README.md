@@ -1,8 +1,8 @@
 # uptime
 
-Uptime is a simple golang application that can be used to monitor and alert on server reboots.
+Uptime is a simple Rust application that can be used to monitor and alert on server reboots.
 
-At a configured freuqney is writes the current time to a specified file. When the application starts up it reads that
+At a configured frequency is writes the current time to a specified file. When the application starts up it reads that
 file and will post a discord notification saying that the server has booted and was last running at the date of the last
 heartbeat.
 
@@ -22,5 +22,5 @@ Usage: ./uptime [-h|-f|-d <value>]
 
 ## Resource Usage
 
-uptime has a very small footprint. The vast majority of its time will be idiling between heartbeats and consumes only
+uptime has a very small footprint. The vast majority of its time will be idling between heartbeats and consumes only
 about a megabyte of memory at any given time.
