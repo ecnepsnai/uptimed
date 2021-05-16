@@ -9,9 +9,9 @@ use std::{process, thread, time};
 /// Upon startup, a notification was not posted
 const NOTIFY_STARTUP_FALSE: u8 = 0;
 /// Upon startup, an unsuccessful attempt to post a notification was made
-const NOTIFY_STARTUP_FAILED: u8 = 0;
+const NOTIFY_STARTUP_FAILED: u8 = 1;
 /// Upon startup, a notification was posted
-const NOTIFY_STARTUP_NOTIFIED: u8 = 0;
+const NOTIFY_STARTUP_NOTIFIED: u8 = 2;
 
 /// Describes options for application runtime
 struct Options<'a> {
@@ -76,6 +76,11 @@ fn main() {
             print_help_and_exit();
         }
     }
+
+    println!(
+        "Starting uptime monitor v{} with options: webhook_url='{}' heartbeat_file_path='{}' heartbeat_frequency={}",
+        env!("CARGO_PKG_VERSION"), options.webhook_url, options.heartbeat_file_path, options.heartbeat_frequency
+    );
 
     loop {
         options.did_notify_startup = check_heartbeat(&options);
@@ -152,10 +157,6 @@ fn read_last_heartbeat_file(heartbeat_file_path: &str) -> Option<String> {
 /// # Returns
 /// Returns a new value for the did_notify_startup
 fn check_heartbeat(options: &Options) -> u8 {
-    if options.webhook_url == "" {
-        return NOTIFY_STARTUP_NOTIFIED;
-    }
-
     if options.did_notify_startup == 2 {
         return NOTIFY_STARTUP_NOTIFIED;
     }
@@ -180,6 +181,10 @@ fn check_heartbeat(options: &Options) -> u8 {
         last_heartbeat_str
     );
     println!("{}", message);
+    if options.webhook_url == "" {
+        return NOTIFY_STARTUP_NOTIFIED;
+    }
+
     return match discord_say(message, &options.webhook_url) {
         Ok(_v) => NOTIFY_STARTUP_NOTIFIED,
         Err(_e) => NOTIFY_STARTUP_FAILED,
@@ -205,6 +210,10 @@ fn discord_say(message: String, webhook_url: &str) -> Result<(), String> {
     let req = HTTPClient::new()
         .post(webhook_url)
         .header("Content-Type", "application/JSON")
+        .header(
+            "User-Agent",
+            format!("uptime/{}", env!("CARGO_PKG_VERSION")),
+        )
         .json(&body);
     return match req.send() {
         Ok(_v) => Ok(()),
