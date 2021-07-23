@@ -111,9 +111,31 @@ fn print_help_and_exit() {
 /// Will panic if it could not create or write to the file
 fn write_heartbeat_file(heartbeat_file_path: &str) {
     let path = Path::new(heartbeat_file_path);
-    let mut file = File::create(&path).expect("create failed");
+
+    let mut file = match File::create(&path) {
+        Err(_why) => {
+            println!(
+                "Error creating heartbeat file '{}': {}",
+                heartbeat_file_path, _why
+            );
+            return;
+        }
+        Ok(file) => file,
+    };
     let ts: String = Local::now().timestamp().to_string();
-    file.write_all(ts.as_bytes()).expect("write failed");
+
+    match file.write_all(ts.as_bytes()) {
+        Err(_why) => {
+            println!(
+                "Error writing heartbeat file '{}': {}",
+                heartbeat_file_path, _why
+            );
+            return;
+        }
+        Ok(_v) => _v,
+    };
+
+    println!("Wrote '{}' to heartbeat file '{}'", ts, heartbeat_file_path);
 }
 
 /// Read the last heartbeat file and get a formatted date string from it
@@ -128,20 +150,31 @@ fn read_last_heartbeat_file(heartbeat_file_path: &str) -> Option<String> {
     }
 
     let mut file = match File::open(&path) {
-        Err(_why) => return None,
+        Err(_why) => {
+            println!("Error opening heartbeat file: {}", _why);
+            return None;
+        }
         Ok(file) => file,
     };
     let mut ts_str = String::new();
 
     match file.read_to_string(&mut ts_str) {
-        Err(_why) => return None,
+        Err(_why) => {
+            println!("Error reading heartbeat file: {}", _why);
+            return None;
+        }
         Ok(_) => {}
     };
 
     let timestamp = match ts_str.parse::<i64>() {
-        Err(_e) => return None,
+        Err(_e) => {
+            println!("Heartbeat file was not valid int64: {}, {}", ts_str, _e);
+            return None;
+        }
         Ok(t) => t,
     };
+
+    println!("Last heartbeat timestamp: {}", timestamp);
 
     return Some(
         Local
@@ -170,6 +203,7 @@ fn check_heartbeat(options: &Options) -> u8 {
     } else {
         let result = read_last_heartbeat_file(options.heartbeat_file_path);
         if result.is_none() {
+            println!("No heartbeat file found or data unrecognized");
             return NOTIFY_STARTUP_NOTIFIED;
         }
         last_heartbeat_str = result.unwrap();
@@ -215,8 +249,13 @@ fn discord_say(message: String, webhook_url: &str) -> Result<(), String> {
             format!("uptime/{}", env!("CARGO_PKG_VERSION")),
         )
         .json(&body);
-    return match req.send() {
-        Ok(_v) => Ok(()),
-        Err(e) => Err(e.to_string()),
+    match req.send() {
+        Err(_why) => {
+            println!("Error posting discord message: {}", _why.to_string());
+            return Err(_why.to_string());
+        }
+        Ok(_v) => {
+            return Ok(());
+        }
     };
 }
