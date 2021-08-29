@@ -15,7 +15,7 @@
 //        Will also take value from environment variable HEARTBEAT_FREQUENCY.
 //    -d  --discord-webhook-url
 //        Optionally specify a discord webhook URL to announce when the application starts.
-//        Will also take value from environment variable DISCORD_WEBBOOK_URL.
+//        Will also take value from environment variable DISCORD_WEBHOOK_URL.
 package main
 
 import (
@@ -33,7 +33,7 @@ func printHelpAndExit() {
 	fmt.Printf("Usage: %s [-h|-f|-d <value>]\n", os.Args[0])
 	fmt.Printf("-h  --heartbeat-file\n\tSpecify the file path to where the uptime heartbeat should be written.\n\tDefaults to .uptimed_heartbeat\n\tWill also take value from environment variable HEARTBEAT_FILE.\n")
 	fmt.Printf("-f  --heartbeat-frequency\n\tSpecify the frequency in minutes for how often the heartbeat should be updated.\n\tDefaults to 10 minutes.\n\tWill also take value from environment variable HEARTBEAT_FREQUENCY.\n")
-	fmt.Printf("-d  --discord-webhook-url\n\tOptionally specify a discord webhook URL to announce when the application starts.\n\tWill also take value from environment variable DISCORD_WEBBOOK_URL.\n")
+	fmt.Printf("-d  --discord-webhook-url\n\tOptionally specify a discord webhook URL to announce when the application starts.\n\tWill also take value from environment variable DISCORD_WEBHOOK_URL.\n")
 	os.Exit(1)
 }
 
@@ -61,7 +61,7 @@ func main() {
 			heartbeatFrequencyMinutes = frequency
 		}
 	}
-	if value := os.Getenv("DISCORD_WEBBOOK_URL"); value != "" {
+	if value := os.Getenv("DISCORD_WEBHOOK_URL"); value != "" {
 		discord.WebhookURL = value
 	}
 

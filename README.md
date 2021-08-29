@@ -20,7 +20,7 @@ Usage: ./uptimed [-h|-f|-d <value>]
 	Will also take value from environment variable HEARTBEAT_FREQUENCY.
 -d  --discord-webhook-url
 	Optionally specify a discord webhook URL to announce when the application starts.
-	Will also take value from environment variable DISCORD_WEBBOOK_URL.
+	Will also take value from environment variable DISCORD_WEBHOOK_URL.
 ```
 
 ## Resource Usage
