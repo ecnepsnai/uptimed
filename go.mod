@@ -1,5 +1,5 @@
-module github.com/ecnepsnai/uptime
+module github.com/ecnepsnai/uptimed
 
-go 1.15
+go 1.17
 
-require github.com/ecnepsnai/discord v1.2.0
+require github.com/ecnepsnai/discord v1.2.1
