@@ -1,0 +1,13 @@
+[Unit]
+Description=Uptime and Reboot Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt
+EnvironmentFile=/etc/uptimed.env
+ExecStart=/usr/bin/uptimed
+
+[Install]
+WantedBy=multi-user.target

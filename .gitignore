@@ -1,3 +1,6 @@
 .uptime_heartbeat
 uptime
 .DS_Store
+artifacts/
+build/*.tar.gz
+build/rpms/

@@ -20,7 +20,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -43,8 +43,15 @@ var heartbeatFile = ".uptimed_heartbeat"
 var heartbeatFrequencyMinutes = uint16(10)
 var didNotifyStartup = uint8(0) // 0 = false, 1 = attempted but failed, 2 = true
 var lastHeartbeatBeforeReboot time.Time
+var workingDir = ""
 
 func main() {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	workingDir = wd
+
 	if value := os.Getenv("HEARTBEAT_FILE"); value != "" {
 		heartbeatFile = value
 	}
@@ -127,7 +134,7 @@ func parseFrequency(strValue string) (uint16, error) {
 }
 
 func writeHeartbeat() {
-	f, err := os.CreateTemp("", "uptimed")
+	f, err := os.CreateTemp(workingDir, "uptimed")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening temporary file for writing: %s\n", err.Error())
 		return
@@ -192,7 +199,7 @@ func readLastHeartbeat() (*time.Time, error) {
 	}
 	defer f.Close()
 
-	data, err := ioutil.ReadAll(f)
+	data, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
